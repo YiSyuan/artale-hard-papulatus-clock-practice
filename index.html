@@ -170,6 +170,51 @@ box-shadow:0 0 10px rgba(250,204,21,.4);
 margin-bottom: 12px;
 }
 
+
+@media (max-width:768px){
+body{padding:12px;}
+.layout{grid-template-columns:1fr;}
+.clock{font-size:64px;}
+.top .panel{width:100%!important;}
+.skill{width:calc(50% - 8px);min-width:120px;height:72px;font-size:18px;}
+button{width:100%;margin:6px 0;}
+.modal-content{width:95vw;max-height:85vh;overflow:auto;padding:20px;}
+#overlay{font-size:48px!important;text-align:center;}
+}
+
+@media (max-width:480px){
+.clock{font-size:48px;}
+.skill{width:100%;}
+.panel{padding:10px;}
+h2{font-size:22px;}
+}
+
+
+.option-panel{
+  min-height:auto;
+}
+
+/* Desktop 保持原本 flex 排列 */
+#options{
+  min-height:184px;
+}
+
+/* 只有手機版固定 4 個格位 */
+@media (max-width:768px){
+  #options{
+    display:grid !important;
+    grid-template-columns:1fr;
+    grid-template-rows:repeat(4,72px);
+    gap:12px;
+    min-height:324px;
+    align-content:start;
+  }
+
+  .skill{
+    width:100% !important;
+  }
+}
+
 </style>
 </head>
 <body class="blue">
@@ -198,7 +243,7 @@ margin-bottom: 12px;
 </div>
 
 <div class="layout">
-<div class="panel">
+<div class="panel option-panel">
 <h3>時間選項</h3>
 <div id="countdown"></div>
 <div id="options"></div>
