@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>拉圖斯時鐘練習器</title>
+<style>
+body{
+margin:0;
+padding:20px;
+font-family:Arial,sans-serif;
+color:#fff;
+transition:.5s;
+}
+body.blue{
+background:radial-gradient(circle,rgba(59,130,246,.25),rgba(15,23,42,.95) 60%),linear-gradient(180deg,#0f172a,#1e3a8a,#0f172a);
+}
+body.orange{
+background:radial-gradient(circle,rgba(251,146,60,.25),rgba(20,20,20,.95) 60%),linear-gradient(180deg,#1a1a1a,#5b341c,#1a1a1a);
+}
+.container{
+max-width:1200px;
+margin:0 auto;
+}
+.panel{
+background:rgba(17,24,39,.75);
+border:1px solid rgba(255,255,255,.1);
+border-radius:12px;
+padding:12px;
+backdrop-filter:blur(6px);
+}
+.top{
+display:flex;
+justify-content:center;
+margin-bottom:12px;
+}
+.clock{
+font-size:120px;
+font-family:monospace;
+font-weight:bold;
+text-align:center;
+text-shadow:0 0 20px #93c5fd;
+}
+.layout{
+display:grid;
+grid-template-columns:1fr 420px;
+gap:12px;
+margin-top:12px;
+}
+.skill{
+width:140px;
+height:80px;
+border-radius:12px;
+border:2px solid #60a5fa;
+background:#111827;
+color:#fff;
+font-size:20px;
+cursor:pointer;
+}
+#options{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+justify-content:center;
+}
+button{
+padding:10px 20px;
+font-size:16px;
+font-weight:600;
+margin:4px;
+border:none;
+border-radius:12px;
+background:#2563eb;
+color:white;
+cursor:pointer;
+transition:all .2s ease;
+box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
+
+button:hover{
+transform:translateY(-1px);
+box-shadow:0 6px 14px rgba(0,0,0,.35);
+}
+
+button:active{
+transform:translateY(1px);
+}
+
+button:disabled{
+opacity:.5;
+cursor:not-allowed;
+}
+
+input[type="number"]{
+width:100px;
+padding:12px 14px;
+font-size:16px;
+border-radius:12px;
+border:1px solid rgba(255,255,255,.15);
+background:rgba(17,24,39,.9);
+color:#fff;
+outline:none;
+transition:.2s;
+}
+
+input[type="number"]:focus{
+border-color:#60a5fa;
+box-shadow:0 0 0 4px rgba(96,165,250,.2);
+}
+
+#skipBtn{
+background:#7c3aed;
+}
+
+#skipBtn:hover{
+background:#8b5cf6;
+}
+
+.skill{
+width:140px;
+height:80px;
+border-radius:16px;
+font-weight:700;
+background:#111827;
+}
+
+#overlay{
+position:fixed;
+inset:0;
+display:none;
+align-items:center;
+justify-content:center;
+background:rgba(0,0,0,.9);
+font-size:96px;
+font-weight:bold;
+z-index:9999;
+}
+
+.modal{
+position:fixed;inset:0;background:rgba(0,0,0,.85);
+display:flex;justify-content:center;align-items:center;z-index:10000;
+}
+.modal-content{
+width:min(700px,90vw);
+background:rgba(17,24,39,.95);
+border:1px solid rgba(255,255,255,.15);
+border-radius:16px;padding:32px;color:#fff;line-height:1.8;
+}
+.modal-content h1{text-align:center;margin-top:0}
+
+.start-practice-btn{width:100%;padding:14px;font-size:20px;border-radius:10px;cursor:pointer}
+
+.skill.minute{
+border-color:#a855f7;
+box-shadow:0 0 10px rgba(168,85,247,.4);
+}
+
+.skill.hour{
+border-color:#60a5fa;
+box-shadow:0 0 10px rgba(96,165,250,.4);
+}
+
+.skill.x2{
+border-color:#facc15;
+color:#facc15;
+box-shadow:0 0 10px rgba(250,204,21,.4);
+}
+
+
+</style>
+</head>
+<body class="blue">
+
+<div class="container">
+
+<div class="top">
+<div class="panel" style="width:420px;text-align:center">
+<h2>拉圖斯時鐘練習器</h2>
+<label>要玩幾關？</label>
+<input id="stageInput" type="number" value="5" min="1" style="width:80px">
+<br><br>
+<button onclick="startGame()">開始</button>
+<button onclick="resetGame()">重置</button>
+</div>
+</div>
+
+<div class="top">
+<div class="panel" style="width:420px;text-align:center">
+<h2 id="stageText">第 0 / 0 關</h2>
+</div>
+</div>
+
+<div class="panel">
+<div id="clock" class="clock">--:--</div>
+</div>
+
+<div class="layout">
+<div class="panel">
+<h3>時間選項</h3>
+<div id="countdown"></div>
+<div id="options"></div>
+</div>
+
+<div class="panel">
+<h3>操作</h3>
+<button onclick="nextStage()">下一關</button>
+<button id="skipBtn" onclick="useSkip()">直接跳過 10 秒 [- 0 分鐘] (3/3)</button>
+</div>
+</div>
+
+</div>
+
+<div id="overlay" style="flex-direction:column;gap:24px;">
+<div id="overlayText"></div>
+<button id="restartBtn" onclick="restartGame()" style="display:none;font-size:24px;padding:14px 28px;">
+重新開始
+</button>
+</div>
+
+<div id="helpModal" class="modal">
+  <div class="modal-content">
+    <h1>快速計算時間練習器</h1>
+    <p>歡迎使用拉圖斯時鐘練習模式。</p>
+    <p>本工具會隨機產生一個怪物時間，讓你練習快速判斷應該點擊哪個時間選項。</p>
+
+    <h3>規則說明</h3>
+    <ul>
+      <li>可自行設定練習關卡數量</li>
+      <li>每關開始時，系統會隨機產生一個時間（02:00 ~ 10:00）</li>
+      <li>每關會隨機產生一個扣減值 N（20、30、40、50、60 分鐘）</li>
+      <li>可使用【直接跳過 10 秒】最多 3 次</li>
+      <li>畫面會立即出現 4 個隨機時間選項</li>
+      <li>所有選項會在 40 秒後自動消失</li>
+      <li>也可以直接按下【下一關】進入下一個練習關卡</li>
+    </ul>
+
+    <h3>失敗條件</h3>
+    <ul>
+      <li>時間 <= 00:00</li>
+      <li>時間 > 11:50</li>
+    </ul>
+
+    
+
+    <button class="start-practice-btn" onclick="closeHelpModal()">開始練習</button>
+  </div>
+</div>
+
+
+<script>
+const pool=["10分鐘","30分鐘","50分鐘","1小時","2小時","4小時","9小時","x2"];
+let totalStages=0,currentStage=0,timeM=0,running=false,timer=null;
+let countdownTimer=null;
+let minusN=0;
+let skipRemain=3;
+
+function formatTime(m){return String(Math.floor(m/60)).padStart(2,'0')+":"+String(m%60).padStart(2,'0');}
+function randomStageTime(){
+ const hour=Math.floor(Math.random()*9)+2;
+ const mins=[0,10,20,30,40,50];
+ const minute=mins[Math.floor(Math.random()*mins.length)];
+ return hour*60+minute;
+}
+
+function generateMinusN(){
+ const arr=[20,30,40,50,60];
+ minusN=arr[Math.floor(Math.random()*arr.length)];
+}
+
+function updateSkipButton(){
+ const btn=document.getElementById("skipBtn");
+ if(!btn) return;
+ btn.innerText=`直接跳過 10 秒 [- ${minusN} 分鐘] (${skipRemain}/3)`;
+ btn.disabled=skipRemain<=0;
+}
+
+function useSkip(){
+ if(!running) return;
+ if(skipRemain<=0) return;
+ skipRemain--;
+ timeM-=minusN;
+ updateUI();
+ checkFail();
+ updateSkipButton();
+}
+function updateUI(){
+ clock.innerText=formatTime(timeM);
+ document.body.className=timeM<360?"blue":"orange";
+}
+function showOverlay(text,color,showRestart=false){
+ overlay.style.display="flex";
+ overlay.style.color=color;
+ document.getElementById('overlayText').innerText=text;
+
+ const btn=document.getElementById('restartBtn');
+ btn.style.display=showRestart?'block':'none';
+}
+
+function hideOverlay(){
+ overlay.style.display='none';
+}
+function fail(){clearInterval(timer);
+ if(countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; }running=false;showOverlay("GAME OVER","#ef4444",true);}
+function checkFail(){if(timeM<=0||timeM>710) fail();}
+
+function generateOptions(){
+ if(countdownTimer){
+   clearInterval(countdownTimer);
+ }
+
+ options.innerHTML="";
+ [...pool].sort(()=>Math.random()-0.5).slice(0,4).forEach(v=>{
+   const btn=document.createElement("button");
+   btn.className="skill";
+
+   if(v.includes("分鐘")){
+      btn.classList.add("hour");
+   }else if(v.includes("小時")){
+      btn.classList.add("minute");
+   }else if(v==="x2"){
+      btn.classList.add("x2");
+   }
+
+   btn.innerText=v;
+   btn.onclick=()=>{applyOption(v);btn.remove();};
+   options.appendChild(btn);
+ });
+
+ let remain=40;
+ countdown.innerText="選項剩餘："+remain+" 秒";
+
+ countdownTimer=setInterval(()=>{
+   remain--;
+   countdown.innerText="選項剩餘："+remain+" 秒";
+
+   if(remain<=0){
+     clearInterval(countdownTimer);
+     countdownTimer=null;
+     options.innerHTML="";
+     countdown.innerText="";
+   }
+ },1000);
+}
+
+function applyOption(v){
+ const map={"10分鐘":10,"30分鐘":30,"50分鐘":50,"1小時":60,"2小時":120,"4小時":240,"9小時":540};
+ if(v==="x2") timeM*=2;
+ else timeM+=map[v];
+ updateUI();
+ checkFail();
+}
+
+function startStage(){
+ clearInterval(timer);
+ timeM=randomStageTime();
+ generateMinusN();
+ skipRemain=3;
+ stageText.innerText=`第 ${currentStage} / ${totalStages} 關`;
+ updateUI();
+ updateSkipButton();
+ generateOptions();
+ running=true;
+ 
+}
+
+function startGame(){
+ totalStages=parseInt(stageInput.value||0);
+ if(totalStages<=0) return;
+ currentStage=1;
+ hideOverlay();
+ startStage();
+}
+
+function nextStage(){
+ if(!running) return;
+ if(currentStage>=totalStages){
+   clearInterval(timer);
+   showOverlay("恭喜通關","#facc15",true);
+   return;
+ }
+ currentStage++;
+ startStage();
+}
+
+function resetGame(){
+ clearInterval(timer);
+ totalStages=0;currentStage=0;timeM=0;running=false;
+ minusN=0;
+ skipRemain=3;
+ stageText.innerText="第 0 / 0 關";
+ clock.innerText="--:--";
+ options.innerHTML="";
+ countdown.innerHTML="";
+ const btn=document.getElementById("skipBtn");
+ if(btn){
+   btn.innerText="直接跳過 10 秒 [- 0 分鐘] (3/3)";
+   btn.disabled=false;
+ }
+ hideOverlay();
+}
+
+
+function restartGame(){
+
+ hideOverlay();
+
+ const modal=document.getElementById('helpModal');
+ if(modal){
+   modal.style.display='none';
+ }
+
+ startGame();
+}
+
+function closeHelpModal(){
+ document.getElementById('helpModal').style.display='none';
+}
+
+</script>
+
+</body>
+</html>
+
+<!-- v4 note: use popup_v2 UI as base; logic updates required -->
