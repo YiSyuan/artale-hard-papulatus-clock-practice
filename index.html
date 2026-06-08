@@ -203,16 +203,31 @@ h2{font-size:22px;}
 @media (max-width:768px){
   #options{
     display:grid !important;
-    grid-template-columns:1fr;
-    grid-template-rows:repeat(4,72px);
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:repeat(2,72px);
     gap:12px;
-    min-height:324px;
+    min-height:156px;
     align-content:start;
   }
 
   .skill{
     width:100% !important;
+    min-width:unset;
   }
+}
+
+
+@media (max-width:768px){
+
+.top .panel button{
+  width:calc(50% - 12px) !important;
+  display:inline-block;
+  vertical-align:top;
+}
+
+.top .panel br{
+  display:none;
+}
 }
 
 </style>
@@ -357,7 +372,8 @@ function generateOptions(){
  }
 
  options.innerHTML="";
- [...pool].sort(()=>Math.random()-0.5).slice(0,4).forEach(v=>{
+ for(let i=0;i<4;i++){
+   const v=pool[Math.floor(Math.random()*pool.length)];
    const btn=document.createElement("button");
    btn.className="skill";
 
@@ -372,7 +388,7 @@ function generateOptions(){
    btn.innerText=v;
    btn.onclick=()=>{applyOption(v);btn.remove();};
    options.appendChild(btn);
- });
+ }
 
  let remain=40;
  countdown.innerText="選項剩餘："+remain+" 秒";
